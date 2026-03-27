@@ -267,7 +267,7 @@
         const jumpscareImg = document.getElementById('jumpscare-img');
 
         function startJumpscare() {
-            if (jumpscareInterval) clearInterval(jumpscareInterval); // Evita múltiples animaciones
+            if (jumpscareInterval) clearInterval(jumpscareInterval);
             currentFrame = 0;
             jumpscareImg.src = jumpscareImages[0];
             jumpscareOverlay.style.display = 'flex';
@@ -277,12 +277,11 @@
                 if (currentFrame < jumpscareImages.length) {
                     jumpscareImg.src = jumpscareImages[currentFrame];
                 } else {
-                    // Terminó la animación: ocultar overlay
                     clearInterval(jumpscareInterval);
                     jumpscareInterval = null;
                     jumpscareOverlay.style.display = 'none';
                 }
-            }, 100); // Cambia de imagen cada 100 ms (ajusta según prefieras)
+            }, 100);
         }
 
         // ARRAY DE TRANSCRIPTS DE AUDIO
