@@ -5,9 +5,11 @@
     <title>Five Nights At Anahuac</title>
     <style>
         body { margin: 0; background: black; color: white; font-family: 'Courier New', Courier, monospace; overflow: hidden; user-select: none; }
-        .screen { position: absolute; width: 100vw; height: 100vh; display: none; background-size: cover; background-position: center; }
+        .screen { position: absolute; width: 100vw; height: 100vh; display: none; background-size: cover; background-position: center; transition: opacity 1s ease-in-out; }
         
         #start-screen { display: block; background-image: url('img/inicio.jpeg'); }
+    
+        #context-screen { background-image: url('img/contexto.png'); z-index: 60; opacity: 1; }
         #night-screen { background-color: black; z-index: 50; }
         #gameover-screen { background-image: url('img/gameover.png'); }
         #win-screen { background-image: url('img/youwon.png'); }
@@ -38,6 +40,8 @@
     <audio id="snd-intro"></audio>
 
     <div id="start-screen" class="screen"></div>
+    <div id="context-screen" class="screen"></div>
+    
     <div id="night-screen" class="screen"><div id="night-msg"><span style="margin-top: 100px;" id="night-num">1st Night</span></div></div>
 
     <div id="game-screen" class="screen">
@@ -79,7 +83,6 @@
         const sndIntro = document.getElementById('snd-intro');
 
         function initAudio() { 
-      
             if (!audioStarted && state === 'START') { 
                 sndGeneral.play(); 
                 audioStarted = true; 
@@ -89,15 +92,28 @@
         document.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
                 if (state === 'START') {
-                    startSequence();
+                    showContext();
                 }
                 if (state === 'GAMEOVER' || state === 'WIN') location.reload();
             }
         });
 
+        function showContext() {
+            state = 'CONTEXT';
+            show('context-screen');
+            
+
+            setTimeout(() => {
+                document.getElementById('context-screen').style.opacity = "0";
+            }, 2000);
+
+            setTimeout(() => {
+                startSequence();
+            }, 3000);
+        }
+
         function startSequence() {
             state = 'INTRO';
-      
             sndGeneral.pause(); 
             sndGeneral.currentTime = 0; 
             
@@ -217,6 +233,8 @@
         function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
             document.getElementById(id).style.display = 'block';
+            
+            if(id === 'context-screen') document.getElementById(id).style.opacity = "1";
         }
     </script>
 </body>
