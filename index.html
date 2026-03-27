@@ -145,7 +145,6 @@
             z-index: 200;
             display: none;
             background-color: black;
-            /* fondo negro por si las imágenes no cubren todo */
             justify-content: center;
             align-items: center;
         }
@@ -154,7 +153,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* para que la imagen cubra toda la pantalla */
         }
     </style>
 </head>
@@ -177,8 +175,7 @@
     </div>
 
     <div id="game-screen" class="screen">
-        <div id="hud">NOCHE: <span id="n-val">1</span> | PUNTOS: <span id="pts">0</span>/10 | TIEMPO: <span
-                id="time">1.0</span>s</div>
+        <div id="hud">NOCHE: <span id="n-val">1</span> | PUNTOS: <span id="pts">0</span>/10 | TIEMPO: <span id="time">2.0</span>s</div>
         <div id="game-grid">
             <div class="cam" id="cam1" onclick="catchLeonel(1)">
                 <div class="cam-label">CAM 1: ENTRADA</div>
@@ -221,45 +218,31 @@
         let state = 'START';
         let night = 1;
         let points = 0;
-        let timer = 0;
+        let timer = 2.0;
         let activeCams = [];
-        let gameLoop;
+        let gameLoop = null;
         let audioStarted = false;
 
         const sndGeneral = document.getElementById('snd-general');
         const sndBg = document.getElementById('snd-bg');
         const sndWin = document.getElementById('snd-win');
         const sndScare = document.getElementById('snd-scare');
-
-        // ----------------------- VOLUMEN JUMPSCARE ----------------------------
+        const sndIntro = document.getElementById('snd-intro');
 
         sndScare.volume = 0.5;
 
-        // ----------------------- VOLUMEN JUMPSCARE ----------------------------
-
-        const sndIntro = document.getElementById('snd-intro');
-
-        // ----------------------- INTENTO JUMPSCARE ----------------------------
-
         const jumpscareImages = [
-            'img/jumpscare1.jpeg',
-            'img/jumpscare2.jpeg',
-            'img/jumpscare3.jpeg',
-            'img/jumpscare4.jpeg',
-            'img/jumpscare5.jpeg',
-            'img/jumpscare6.jpeg'
+            'img/jumpscare1.jpeg', 'img/jumpscare2.jpeg', 'img/jumpscare3.jpeg',
+            'img/jumpscare4.jpeg', 'img/jumpscare5.jpeg', 'img/jumpscare6.jpeg'
         ];
         let jumpscareInterval = null;
         let currentFrame = 0;
 
-        // Pre-cargar imágenes para que no haya retraso
-        const preloadedImages = [];
         function preloadJumpscareImages() {
-            for (let i = 0; i < jumpscareImages.length; i++) {
+            jumpscareImages.forEach(src => {
                 const img = new Image();
-                img.src = jumpscareImages[i];
-                preloadedImages.push(img);
-            }
+                img.src = src;
+            });
         }
         preloadJumpscareImages();
 
@@ -284,11 +267,10 @@
             }, 100);
         }
 
-        // ARRAY DE TRANSCRIPTS DE AUDIO
         const transcripts = {
             1: "Hello, welcome to the night shift. Look, there is something you need to know about Leonel. I don't know how he finds you, but he does. Check the cameras.",
             2: "Hey! You survived, good. Tonight gets more interesting. Leonel already knows you are here, he moves faster now.",
-            3: "You are halfway through the week. Honestly, I didn't think you would make it.",
+            3: "You are halfway through the week. Honestly, I didn't think you would make it. He's appearing in multiple places now.",
             4: "If you are hearing this, breathe. Leonel doesn't sleep, he never has. And tonight he is coming fast, very fast. Don't fail.",
             5: "Last night. If you make it to sunrise, you are free. For now. Good luck, you are going to need it."
         };
@@ -302,9 +284,7 @@
 
         document.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
-                if (state === 'START') {
-                    showContext();
-                }
+                if (state === 'START') showContext();
                 if (state === 'GAMEOVER' || state === 'WIN') location.reload();
             }
         });
@@ -312,15 +292,8 @@
         function showContext() {
             state = 'CONTEXT';
             show('context-screen');
-
-
-            setTimeout(() => {
-                document.getElementById('context-screen').style.opacity = "0";
-            }, 2000);
-
-            setTimeout(() => {
-                startSequence();
-            }, 3000);
+            setTimeout(() => { document.getElementById('context-screen').style.opacity = "0"; }, 2000);
+            setTimeout(() => { startSequence(); }, 3000);
         }
 
         function startSequence() {
@@ -331,17 +304,10 @@
             show('night-screen');
             document.getElementById('night-num').innerText = "Night " + night;
             document.getElementById('n-val').innerText = night;
+            document.getElementById('transcript').innerText = transcripts[night] || "";
 
-            // MOSTRAR TRANSCRIPT DE LA NOCHE
-            const transcriptDiv = document.getElementById('transcript');
-            transcriptDiv.innerText = transcripts[night] || "Error en transcripción.";
-
-            let ext = ".wav";
-            sndIntro.src = "sounds/night" + night + "audio" + ext;
-
-            sndIntro.play().catch(() => {
-                setTimeout(startGame, 3000);
-            });
+            sndIntro.src = "sounds/night" + night + "audio.wav";
+            sndIntro.play().catch(() => { setTimeout(startGame, 3000); });
             sndIntro.onended = () => startGame();
         }
 
@@ -350,13 +316,17 @@
             show('game-screen');
             sndBg.play();
             setAllCamsToNormal();
+            points = 0;
+            document.getElementById('pts').innerText = "0";
             resetRound();
             if (!gameLoop) runTimer();
         }
 
         function setAllCamsToNormal() {
             for (let id in camConfig) {
-                document.getElementById('cam' + id).style.backgroundImage = `url('${camConfig[id].normal}')`;
+                const el = document.getElementById('cam' + id);
+                el.classList.remove('danger');
+                el.style.backgroundImage = `url('${camConfig[id].normal}')`;
             }
         }
 
@@ -372,19 +342,20 @@
         }
 
         function resetRound() {
-            document.querySelectorAll('.cam').forEach(c => {
-                c.classList.remove('danger');
-            });
             setAllCamsToNormal();
-
             activeCams = [];
-            let spawnDelay = Math.random() * 500 + 200;
+            
+            let spawnDelay = Math.random() * 800 + 400;
 
             setTimeout(() => {
                 if (state !== 'PLAY') return;
 
+                // LÓGICA DE DIFICULTAD CORREGIDA
                 let camCount = (night <= 2) ? 1 : (night <= 4) ? 2 : 3;
                 let pool = [1, 2, 3, 4, 5, 6];
+
+                timer = 2.0 - (night * 0.1); 
+                document.getElementById('time').innerText = timer.toFixed(1);
 
                 for (let i = 0; i < camCount; i++) {
                     let index = Math.floor(Math.random() * pool.length);
@@ -395,9 +366,6 @@
                     camEl.classList.add('danger');
                     camEl.style.backgroundImage = `url('${camConfig[chosen].danger}')`;
                 }
-
-                timer = 2.0;
-                document.getElementById('time').innerText = "2.0";
             }, spawnDelay);
         }
 
@@ -415,8 +383,6 @@
                     if (points >= 10) {
                         if (night < 5) {
                             night++;
-                            points = 0;
-                            document.getElementById('pts').innerText = "0";
                             sndBg.pause();
                             startSequence();
                         } else {
@@ -427,12 +393,15 @@
                     }
                 }
             } else {
+                
                 gameOver();
             }
         }
 
         function gameOver() {
             state = 'GAMEOVER';
+            clearInterval(gameLoop);
+            gameLoop = null;
             sndBg.pause();
             sndIntro.pause();
             sndScare.play();
@@ -442,6 +411,8 @@
 
         function win() {
             state = 'WIN';
+            clearInterval(gameLoop);
+            gameLoop = null;
             sndBg.pause();
             sndWin.play();
             sndGeneral.play();
@@ -451,7 +422,6 @@
         function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
             document.getElementById(id).style.display = 'block';
-
             if (id === 'context-screen') document.getElementById(id).style.opacity = "1";
         }
     </script>
