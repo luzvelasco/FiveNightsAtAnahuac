@@ -1,63 +1,212 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Five Nights At Anahuac</title>
+    <link rel="stylesheet" href="css/style.css">
     <style>
-        body { margin: 0; background: black; color: white; font-family: 'Courier New', Courier, monospace; overflow: hidden; user-select: none; }
-        .screen { position: absolute; width: 100vw; height: 100vh; display: none; background-size: cover; background-position: center; transition: opacity 1s ease-in-out; }
-        
-        #start-screen { display: block; background-image: url('img/inicio.jpeg'); }
-    
-        #context-screen { background-image: url('img/contexto.png'); z-index: 60; opacity: 1; }
-        #night-screen { background-color: black; z-index: 50; }
-        #gameover-screen { background-image: url('img/gameover.png'); }
-        #win-screen { background-image: url('img/youwon.png'); }
+        body {
+            margin: 0;
+            background: black;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            overflow: hidden;
+            user-select: none;
+        }
 
-        #hud { position: absolute; top: 10px; width: 100%; text-align: center; font-size: 24px; z-index: 100; pointer-events: none; text-shadow: 2px 2px black; }
+        .screen {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            display: none;
+            background-size: cover;
+            background-position: center;
+            transition: opacity 1s ease-in-out;
+        }
 
-        #game-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); width: 100vw; height: 100vh; gap: 4px; background: #111; }
-        .cam { position: relative; background-color: #050505; background-size: cover; background-position: center; border: 1px solid #333; cursor: crosshair; }
-        .cam-label { position: absolute; bottom: 10px; left: 10px; font-size: 14px; background: rgba(0,0,0,0.8); padding: 2px 5px; color: #0f0; z-index: 2; }
+        #start-screen {
+            display: block;
+            background-image: url('img/inicio.jpeg');
+        }
 
-        .danger::before { 
-            content: ""; 
-            position: absolute; 
-            top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(255, 255, 0, 0.3); 
-            box-shadow: inset 0 0 100px rgba(255, 255, 0, 0.6); 
-            pointer-events: none; 
+        #context-screen {
+            background-image: url('img/contexto.png');
+            z-index: 60;
+            opacity: 1;
+        }
+
+        #night-screen {
+            background-color: black;
+            z-index: 50;
+        }
+
+        #gameover-screen {
+            background-image: url('img/gameover.png');
+        }
+
+        #win-screen {
+            background-image: url('img/youwon.jpeg');
+        }
+
+        #hud {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 24px;
+            z-index: 100;
+            pointer-events: none;
+            text-shadow: 2px 2px black;
+        }
+
+        #game-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            width: 100vw;
+            height: 100vh;
+            gap: 4px;
+            background: #111;
+        }
+
+        .cam {
+            position: relative;
+            background-color: #050505;
+            background-size: cover;
+            background-position: center;
+            border: 1px solid #333;
+            cursor: crosshair;
+        }
+
+        .cam-label {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 2px 5px;
+            color: #0f0;
+            z-index: 2;
+        }
+
+        .danger::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 0, 0.3);
+            box-shadow: inset 0 0 100px rgba(255, 255, 0, 0.6);
+            pointer-events: none;
             z-index: 1;
         }
-        
-        #night-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 60px; text-align: center; background-image: url('img/night1.jpg'); background-size: contain; background-repeat: no-repeat; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+
+        #night-msg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            text-align: center;
+            background-image: url('img/night1.jpg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #transcript {
+            margin-top: 25px;
+            font-size: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 70%;
+            text-align: center;
+            font-family: monospace;
+            border: 1px solid #0f0;
+            color: #0f0;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        #jumpscare-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 200;
+            display: none;
+            background-color: black;
+            /* fondo negro por si las imágenes no cubren todo */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .jumpscare-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* para que la imagen cubra toda la pantalla */
+        }
     </style>
 </head>
+
 <body onclick="initAudio()">
     <audio id="snd-general" src="sounds/generalaudio.mp3" loop></audio>
     <audio id="snd-bg" src="sounds/BackgroundMusic.mp3" loop></audio>
     <audio id="snd-scare" src="sounds/Jumpscare Sound.mp3"></audio>
+    <audio id="snd-win" src="sounds/yippee.mp3"></audio>
     <audio id="snd-intro"></audio>
 
     <div id="start-screen" class="screen"></div>
     <div id="context-screen" class="screen"></div>
-    
-    <div id="night-screen" class="screen"><div id="night-msg"><span style="margin-top: 100px;" id="night-num">1st Night</span></div></div>
+
+    <div id="night-screen" class="screen">
+        <div id="night-msg">
+            <span style="margin-top: 100px;" id="night-num">1st Night</span>
+            <div id="transcript"></div>
+        </div>
+    </div>
 
     <div id="game-screen" class="screen">
-        <div id="hud">NOCHE: <span id="n-val">1</span> | PUNTOS: <span id="pts">0</span>/10 | TIEMPO: <span id="time">1.0</span>s</div>
+        <div id="hud">NOCHE: <span id="n-val">1</span> | PUNTOS: <span id="pts">0</span>/10 | TIEMPO: <span
+                id="time">1.0</span>s</div>
         <div id="game-grid">
-            <div class="cam" id="cam1" onclick="catchLeonel(1)"><div class="cam-label">CAM 1: ENTRADA</div></div>
-            <div class="cam" id="cam2" onclick="catchLeonel(2)"><div class="cam-label">CAM 2: CISCO</div></div>
-            <div class="cam" id="cam3" onclick="catchLeonel(3)"><div class="cam-label">CAM 3: OXXO</div></div>
-            <div class="cam" id="cam4" onclick="catchLeonel(4)"><div class="cam-label">CAM 4: BANDERA</div></div>
-            <div class="cam" id="cam5" onclick="catchLeonel(5)"><div class="cam-label">CAM 5: PAPA</div></div>
-            <div class="cam" id="cam6" onclick="catchLeonel(6)"><div class="cam-label">CAM 6: PASILLO</div></div>
+            <div class="cam" id="cam1" onclick="catchLeonel(1)">
+                <div class="cam-label">CAM 1: ENTRADA</div>
+            </div>
+            <div class="cam" id="cam2" onclick="catchLeonel(2)">
+                <div class="cam-label">CAM 2: CISCO</div>
+            </div>
+            <div class="cam" id="cam3" onclick="catchLeonel(3)">
+                <div class="cam-label">CAM 3: OXXO</div>
+            </div>
+            <div class="cam" id="cam4" onclick="catchLeonel(4)">
+                <div class="cam-label">CAM 4: BANDERA</div>
+            </div>
+            <div class="cam" id="cam5" onclick="catchLeonel(5)">
+                <div class="cam-label">CAM 5: PAPA</div>
+            </div>
+            <div class="cam" id="cam6" onclick="catchLeonel(6)">
+                <div class="cam-label">CAM 6: PASILLO</div>
+            </div>
         </div>
     </div>
 
     <div id="gameover-screen" class="screen"></div>
     <div id="win-screen" class="screen"></div>
+
+    <div id="jumpscare-overlay">
+        <img id="jumpscare-img" class="jumpscare-img" alt="Jumpscare">
+    </div>
 
     <script>
         const camConfig = {
@@ -76,17 +225,80 @@
         let activeCams = [];
         let gameLoop;
         let audioStarted = false;
-        
+
         const sndGeneral = document.getElementById('snd-general');
         const sndBg = document.getElementById('snd-bg');
+        const sndWin = document.getElementById('snd-win');
         const sndScare = document.getElementById('snd-scare');
+
+        // ----------------------- VOLUMEN JUMPSCARE ----------------------------
+
+        sndScare.volume = 0.5;
+
+        // ----------------------- VOLUMEN JUMPSCARE ----------------------------
+
         const sndIntro = document.getElementById('snd-intro');
 
-        function initAudio() { 
-            if (!audioStarted && state === 'START') { 
-                sndGeneral.play(); 
-                audioStarted = true; 
-            } 
+        // ----------------------- INTENTO JUMPSCARE ----------------------------
+
+        const jumpscareImages = [
+            'img/jumpscare1.jpeg',
+            'img/jumpscare2.jpeg',
+            'img/jumpscare3.jpeg',
+            'img/jumpscare4.jpeg',
+            'img/jumpscare5.jpeg',
+            'img/jumpscare6.jpeg'
+        ];
+        let jumpscareInterval = null;
+        let currentFrame = 0;
+
+        // Pre-cargar imágenes para que no haya retraso
+        const preloadedImages = [];
+        function preloadJumpscareImages() {
+            for (let i = 0; i < jumpscareImages.length; i++) {
+                const img = new Image();
+                img.src = jumpscareImages[i];
+                preloadedImages.push(img);
+            }
+        }
+        preloadJumpscareImages();
+
+        const jumpscareOverlay = document.getElementById('jumpscare-overlay');
+        const jumpscareImg = document.getElementById('jumpscare-img');
+
+        function startJumpscare() {
+            if (jumpscareInterval) clearInterval(jumpscareInterval); // Evita múltiples animaciones
+            currentFrame = 0;
+            jumpscareImg.src = jumpscareImages[0];
+            jumpscareOverlay.style.display = 'flex';
+
+            jumpscareInterval = setInterval(() => {
+                currentFrame++;
+                if (currentFrame < jumpscareImages.length) {
+                    jumpscareImg.src = jumpscareImages[currentFrame];
+                } else {
+                    // Terminó la animación: ocultar overlay
+                    clearInterval(jumpscareInterval);
+                    jumpscareInterval = null;
+                    jumpscareOverlay.style.display = 'none';
+                }
+            }, 100); // Cambia de imagen cada 100 ms (ajusta según prefieras)
+        }
+
+        // ARRAY DE TRANSCRIPTS DE AUDIO
+        const transcripts = {
+            1: "Hello, welcome to the night shift. Look, there is something you need to know about Leonel. I don't know how he finds you, but he does. Check the cameras.",
+            2: "Hey! You survived, good. Tonight gets more interesting. Leonel already knows you are here, he moves faster now.",
+            3: "You are halfway through the week. Honestly, I didn't think you would make it.",
+            4: "If you are hearing this, breathe. Leonel doesn't sleep, he never has. And tonight he is coming fast, very fast. Don't fail.",
+            5: "Last night. If you make it to sunrise, you are free. For now. Good luck, you are going to need it."
+        };
+
+        function initAudio() {
+            if (!audioStarted && state === 'START') {
+                sndGeneral.play();
+                audioStarted = true;
+            }
         }
 
         document.addEventListener('keydown', e => {
@@ -101,7 +313,7 @@
         function showContext() {
             state = 'CONTEXT';
             show('context-screen');
-            
+
 
             setTimeout(() => {
                 document.getElementById('context-screen').style.opacity = "0";
@@ -114,16 +326,20 @@
 
         function startSequence() {
             state = 'INTRO';
-            sndGeneral.pause(); 
-            sndGeneral.currentTime = 0; 
-            
+            sndGeneral.pause();
+            sndGeneral.currentTime = 0;
+
             show('night-screen');
             document.getElementById('night-num').innerText = "Night " + night;
             document.getElementById('n-val').innerText = night;
-            
-            let ext = ".wav"; 
+
+            // MOSTRAR TRANSCRIPT DE LA NOCHE
+            const transcriptDiv = document.getElementById('transcript');
+            transcriptDiv.innerText = transcripts[night] || "Error en transcripción.";
+
+            let ext = ".wav";
             sndIntro.src = "sounds/night" + night + "audio" + ext;
-            
+
             sndIntro.play().catch(() => {
                 setTimeout(startGame, 3000);
             });
@@ -133,8 +349,8 @@
         function startGame() {
             state = 'PLAY';
             show('game-screen');
-            sndBg.play(); 
-            setAllCamsToNormal(); 
+            sndBg.play();
+            setAllCamsToNormal();
             resetRound();
             if (!gameLoop) runTimer();
         }
@@ -161,13 +377,13 @@
                 c.classList.remove('danger');
             });
             setAllCamsToNormal();
-            
+
             activeCams = [];
             let spawnDelay = Math.random() * 500 + 200;
 
             setTimeout(() => {
                 if (state !== 'PLAY') return;
-                
+
                 let camCount = (night <= 2) ? 1 : (night <= 4) ? 2 : 3;
                 let pool = [1, 2, 3, 4, 5, 6];
 
@@ -175,14 +391,14 @@
                     let index = Math.floor(Math.random() * pool.length);
                     let chosen = pool.splice(index, 1)[0];
                     activeCams.push(chosen);
-                    
+
                     const camEl = document.getElementById('cam' + chosen);
                     camEl.classList.add('danger');
                     camEl.style.backgroundImage = `url('${camConfig[chosen].danger}')`;
                 }
 
-                timer = 1.0; 
-                document.getElementById('time').innerText = "1.0";
+                timer = 2.0;
+                document.getElementById('time').innerText = "2.0";
             }, spawnDelay);
         }
 
@@ -218,24 +434,28 @@
 
         function gameOver() {
             state = 'GAMEOVER';
-            sndBg.pause(); sndIntro.pause();
+            sndBg.pause();
+            sndIntro.pause();
             sndScare.play();
+            startJumpscare();
             show('gameover-screen');
         }
 
         function win() {
             state = 'WIN';
             sndBg.pause();
-            sndGeneral.play(); 
+            sndWin.play();
+            sndGeneral.play();
             show('win-screen');
         }
 
         function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
             document.getElementById(id).style.display = 'block';
-            
-            if(id === 'context-screen') document.getElementById(id).style.opacity = "1";
+
+            if (id === 'context-screen') document.getElementById(id).style.opacity = "1";
         }
     </script>
 </body>
+
 </html>
